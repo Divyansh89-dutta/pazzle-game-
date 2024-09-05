@@ -1,0 +1,71 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Game</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-500 flex justify-center items-center h-screen">
+        <div id="puzzle-container" class="grid grid-cols-4 gap-2"></div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const puzzleContainer = document.getElementById('puzzle-container');
+                const size = 4; 
+                let tiles = [...Array(size * size).keys()]; 
+                function shuffle(array) {
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    return array;
+                }
+                function createTile(value) {
+                    const tile = document.createElement('div');
+                    tile.className = `tile ${value === 0 ? 'bg-gray-200 cursor-default' : 'bg-blue-500 cursor-pointer'} flex justify-center rounded-2xl border-8 hover:bg-red-500 duration-300 p-10 items-center text-white text-2xl`;
+                    tile.textContent = value === 0 ? '' : value;
+                    tile.addEventListener('click', () => moveTile(value));
+                    return tile;
+                }
+                function render() {
+                    puzzleContainer.innerHTML = '';
+                    tiles.forEach(value => {
+                        const tile = createTile(value);
+                        puzzleContainer.appendChild(tile);
+                    });
+                }
+                function moveTile(value) {
+                    const index = tiles.indexOf(value);
+                    const emptyIndex = tiles.indexOf(0);
+                    const validMoves = getValidMoves(emptyIndex);
+
+                    if (validMoves.includes(index)) {
+                        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+                        render();
+                        checkWin();
+                    }
+                }
+                function getValidMoves(emptyIndex) {
+                    const validMoves = [];
+                    const row = Math.floor(emptyIndex / size);
+                    const col = emptyIndex % size;
+
+                    if (col > 0) validMoves.push(emptyIndex - 1); 
+                    if (col < size - 1) validMoves.push(emptyIndex + 1); 
+                    if (row > 0) validMoves.push(emptyIndex - size);
+                    if (row < size - 1) validMoves.push(emptyIndex + size); 
+
+                    return validMoves;
+                }
+                function checkWin() {
+                    if (tiles.every((value, index) => value === index)) {
+                        setTimeout(() => alert('You win!'), 100);
+                    }
+                }
+                tiles = shuffle(tiles);
+                render();
+            });
+        </script>
+    </body>
+    </html>
